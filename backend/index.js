@@ -3,7 +3,14 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
 app.use(express.json());
 
 const USER_ID = "sumitadhikari_14042005";
@@ -127,7 +134,7 @@ app.post("/bfhl", (req, res) => {
 
     if (!Array.isArray(data)) {
       return res.status(400).json({
-        error: "data must be an array"
+        error: "data must be an array",
       });
     }
 
@@ -160,8 +167,6 @@ app.post("/bfhl", (req, res) => {
 
       const [parent, child] = trimmed.split("->");
 
-      // Multi-parent rule:
-      // first parent wins, later parent edges for same child are silently discarded.
       if (childToParent.has(child)) {
         continue;
       }
@@ -203,12 +208,7 @@ app.post("/bfhl", (req, res) => {
     let largestDepth = 0;
 
     for (const group of groups) {
-      const groupSet = new Set(group);
-
-      const groupRoots = group
-        .filter((node) => !childNodes.has(node))
-        .sort();
-
+      const groupRoots = group.filter((node) => !childNodes.has(node)).sort();
       const hasCycle = detectCycleInGroup(group, graph);
 
       let root;
@@ -216,7 +216,6 @@ app.post("/bfhl", (req, res) => {
       if (groupRoots.length > 0) {
         root = groupRoots[0];
       } else {
-        // Pure cycle case: lexicographically smallest node as root
         root = group[0];
       }
 
@@ -224,7 +223,7 @@ app.post("/bfhl", (req, res) => {
         hierarchies.push({
           root,
           tree: {},
-          has_cycle: true
+          has_cycle: true,
         });
 
         total_cycles++;
@@ -237,7 +236,7 @@ app.post("/bfhl", (req, res) => {
         hierarchies.push({
           root,
           tree,
-          depth
+          depth,
         });
 
         total_trees++;
@@ -253,7 +252,7 @@ app.post("/bfhl", (req, res) => {
       }
     }
 
-    res.json({
+    return res.json({
       user_id: USER_ID,
       email_id: EMAIL_ID,
       college_roll_number: ROLL_NUMBER,
@@ -263,13 +262,13 @@ app.post("/bfhl", (req, res) => {
       summary: {
         total_trees,
         total_cycles,
-        largest_tree_root
-      }
+        largest_tree_root,
+      },
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       error: "Internal server error",
-      details: error.message
+      details: error.message,
     });
   }
 });
