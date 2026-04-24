@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-const API_URL = "http://localhost:3000/bfhl";
+const API_URL = "https://srm-bfhl-backend-j3bo.onrender.com/bfhl";
 
 function App() {
   const [input, setInput] = useState("A->B, A->C, B->D");
